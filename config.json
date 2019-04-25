@@ -22,6 +22,17 @@
       "intervalo": "12",
       "cantidad": "333",
       "timesPaid": 0
+    },
+    {
+      "nombre": "Merunas",
+      "fecha": "2019-08-14",
+      "horaPrimerPago": "10:00",
+      "email": "merunasgrincalaitis@gmail.com",
+      "vecesRepetir": "4",
+      "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
+      "intervalo": "5",
+      "cantidad": "100",
+      "timesPaid": 0
     }
   ]
 }

@@ -37,7 +37,7 @@ class Home extends React.Component {
             this.setState({seedSetupMessage: 'No hay ninguna seed guardada en el programa, añade una nueva'})
         }
 
-        response = await fetch('/get-automations')
+        response = await fetch('/automations')
         response = await response.json()
         console.log('Automations', response)
 

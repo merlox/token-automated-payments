@@ -111,7 +111,7 @@ function automatize(automatizaciones) {
 			let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
 			if(auto.timesPaid == 0) {
 				// If the time has come, send the first payment
-				if(año >= añoObjetivo && mes >= mesObjetivo && dia >= diaObjetivo && hora >= horaObjetivo && minuto >= minutoObjetivo)
+				if(año >= añoObjetivo && mes >= mesObjetivo && dia >= diaObjetivo && hora >= horaObjetivo && minuto >= minutoObjetivo) {
 					console.log('Sending first payment...')
 					automatizaciones[i].timesPaid++
 					transfer(auto.receiver, auto.cantidad, automatizaciones[i])
@@ -154,7 +154,6 @@ function transfer(receiver, cantidad, automation) {
         chainId: 3, // Ropsten TODO uncomment this on production
     }
 	let history = storage.get('history') ? storage.get('history') : []
-
     web3.eth.accounts.signTransaction(tx, privateKey).then(signed => {
         console.log('Generating transaction...')
         web3.eth.sendSignedTransaction(signed.rawTransaction)
