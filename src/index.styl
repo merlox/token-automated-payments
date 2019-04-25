@@ -1,0 +1,115 @@
+*
+    box-sizing: border-box
+
+body
+    background-color: whitesmoke
+    font-family: sans-serif
+    margin: 0
+
+button
+    border: none
+    background-color: black
+    color: white
+    cursor: pointer
+    width: 200px
+    height: 50px
+
+    &:hover
+        opacity: 0.9
+
+    &:disabled
+        background-color: grey
+        cursor: not-allowed
+        opacity: 0.9
+
+input, textarea
+    padding: 20px
+    border: 1px solid black
+    width: 100%
+
+.hidden
+    display: none
+
+.header
+    background-color: black
+    color: white
+    padding: 15px
+    margin-bottom: 20px
+    text-align: center
+    display: flex
+    justify-content: space-around
+
+    a
+        color: white
+        text-decoration: none
+        margin-right: 10px
+
+        &:hover
+            color: lightgrey
+
+.spacer
+    height: 200px
+    width: 100%
+
+.center
+    text-align: center
+
+.home-container
+    display: grid
+    grid-template-columns: 50% 50%
+    grid-gap: 20px
+    justify-items: center
+    margin: auto
+    width: 80%
+
+    .clave-privada
+        display: grid
+        grid-template-rows: auto auto auto auto auto 1fr
+        justify-items: center
+        grid-gap: 10px
+
+    .automatizacion
+        display: grid
+        grid-template-columns: 1fr
+        justify-items: center
+        grid-gap: 10px
+
+        .cuenta
+            width: 100%
+
+        .payment-block
+            display: grid
+            justify-items: center
+            width: 100%
+            grid-template-columns: 1fr 60% 1fr
+            grid-gap: 5px
+
+            .pagar-cada
+                justify-self: left
+
+            .payment-input
+                width: 100%
+
+        .token-block
+            display: grid
+            width: 100%
+            grid-template-columns: 1fr 70%
+            grid-gap: 5px
+
+.two-block
+    display: grid
+    grid-template-columns: 40% 60%
+    width: 100%
+
+    p
+        justify-self: center
+
+    input
+        grid-column: 2 / 3
+        justify-self: center
+
+.end-spacer
+    height: 250px
+
+.dashboard
+    text-align: center

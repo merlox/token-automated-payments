@@ -1,0 +1,27 @@
+{
+  "seedPhrase": "please table ivory want future true medal rich purchase duty blame since",
+  "automatizaciones": [
+    {
+      "nombre": "Merunas",
+      "fecha": "3221-03-12",
+      "horaPrimerPago": "12:33",
+      "email": "merunas@gmail.com",
+      "vecesRepetir": "2",
+      "receiver": "0xsoidfj283foim",
+      "intervalo": "12",
+      "cantidad": "333",
+      "timesPaid": 0
+    },
+    {
+      "nombre": "Merunas",
+      "fecha": "3221-03-12",
+      "horaPrimerPago": "12:33",
+      "email": "merunas@gmail.com",
+      "vecesRepetir": "2",
+      "receiver": "0xsoidfj283foim",
+      "intervalo": "12",
+      "cantidad": "333",
+      "timesPaid": 0
+    }
+  ]
+}
