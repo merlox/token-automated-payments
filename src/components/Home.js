@@ -11,6 +11,7 @@ class Home extends React.Component {
             response: '',
             seedSetupMessage: '',
             automatizeMessage: '',
+            automations: [],
 
             nombre: '',
             fecha: '',
@@ -39,10 +40,10 @@ class Home extends React.Component {
 
         response = await fetch('/automations')
         response = await response.json()
+        this.setState({automations: response})
         console.log('Automations', response)
 
         // Quitado de momento por añadir bastante complejidad
-
         // response = await fetch('/get-accounts-seed')
         // response = await response.json()
         // console.log('Accounts seed', response)
@@ -93,7 +94,6 @@ class Home extends React.Component {
         return (
             <div>
                 <Header />
-                <Dashboard />
                 <div className="home-container">
                     <div className="clave-privada">
                         <h2>1. Acceso a la cuenta</h2>
@@ -175,9 +175,11 @@ class Home extends React.Component {
                         </div>
                         <button disabled={!this.state.guardarClicked} title="Tienes que guardar tu seed phrase antes de activar la automatización" className="payment-button" onClick={() => {
                             this.automatize()
+                            window.scrollTo(0, 0)
                         }}>Comenzar a realizar pagos</button>
                     </div>
                 </div>
+                <Dashboard automations={this.state.automations} />
                 <div className="end-spacer"></div>
             </div>
         )
@@ -188,28 +190,8 @@ class Dashboard extends React.Component {
     constructor() {
         super()
         this.state = {
-            interval: '',
-            receiver: '',
-            tokens: '',
-            history: [],
-            isActive: false,
-            ultimoPago: false, // El date del pago mas reciente pago
-            mensajePagosDetenidos: '',
+            mensajePagosDetenidos: ''
         }
-        this.getData()
-    }
-
-    async getData() {
-        let response = await fetch('/current-state')
-        response = await response.json()
-        this.setState({
-            interval: response.interval,
-            receiver: response.receiver,
-            tokens: response.tokens,
-            history: response.history,
-            isActive: response.isActive,
-            ultimoPago: response.ultimoPago,
-        })
     }
 
     async detenerPagos() {
@@ -220,13 +202,15 @@ class Dashboard extends React.Component {
     }
 
     render() {
+        let automationsHTML = this.props.automations
+
+        console.log('Automations html', automationsHTML)
+
         return(
             <div className="dashboard">
-                <b>{this.state.isActive ? 'Hay una automatización en progreso' : 'No hay ninguna automatización en progreso'}</b>
-                <p className={this.state.ultimoPago ? '' : 'hidden'}>Pago más reciente realizado: {this.state.ultimoPago}</p>
-                <p className={this.state.receiver ? '' : 'hidden'}>Cuenta de Ethereum recibiendo pagos: {this.state.receiver}</p>
-                <p className={this.state.tokens ? '' : 'hidden'}>Cantidad de tokens por pago: {this.state.tokens} RES</p>
-                <p className={this.state.interval ? '' : 'hidden'}>Intervalo de pagos: {this.state.interval} horas</p>
+                <div>
+                </div>
+                <b>{this.props.automations.length <= 0 ? 'No hay ninguna automatización en progreso' : ''}</b>
                 <p><b>{this.state.mensajePagosDetenidos}</b></p>
                 <button onClick={() => this.detenerPagos()}>Detener pagos</button>
             </div>

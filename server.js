@@ -49,7 +49,8 @@ app.post('/automatize', (req, res) => {
 	automatizaciones.push(automatizacion)
 	storage.set('automatizaciones', automatizaciones)
 	storage.set('lastId', lastId)
-	automatize()
+	clearInterval(interval)
+	automatize(automatizaciones)
 	res.send(JSON.stringify({isOk: true}))
 })
 app.get('/automations', (req, res) => {
