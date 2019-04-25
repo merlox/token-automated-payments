@@ -53,7 +53,8 @@ app.post('/automatize', (req, res) => {
 	res.send(JSON.stringify({isOk: true}))
 })
 app.get('/automations', (req, res) => {
-	res.send(JSON.stringify(storage.get('automatizaciones')))
+	const automations = storage.get('automatizaciones') ? JSON.stringify(storage.get('automatizaciones')) : []
+	res.send(automations)
 })
 app.get('/stop-automatize', (req, res) => {
 	storage.set('interval', undefined)
