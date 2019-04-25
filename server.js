@@ -153,7 +153,7 @@ function transfer(receiver, cantidad, automation) {
 		chainId: 1,
         chainId: 3, // Ropsten TODO uncomment this on production
     }
-	let pastResults = storage.get('history') ? storage.get('history') : []
+	let history = storage.get('history') ? storage.get('history') : []
 
     web3.eth.accounts.signTransaction(tx, privateKey).then(signed => {
         console.log('Generating transaction...')
@@ -162,15 +162,15 @@ function transfer(receiver, cantidad, automation) {
                 console.log('Transfer successful!')
 				automation.isOk = true
 				automation.error = false
-				pastResults.push(automation)
-				storage.set('history', pastResults)
+				history.push(automation)
+				storage.set('history', history)
             })
             .catch(error => {
 				console.log('Error', error)
 				automation.isOk = false
 				automation.error = error
-				pastResults.push(automation)
-				storage.set('history', pastResults)
+				history.push(automation)
+				storage.set('history', history)
 			})
     })
 }
