@@ -31,7 +31,10 @@ app.post('/seed-phrase', (req, res) => {
     res.send(JSON.stringify({isOk: true}))
 })
 app.post('/automatize', (req, res) => {
+	let lastId = storage.get('lastId') ? storage.get('lastId') : 1
+	lastId++
 	const automatizacion = {
+		id: lastId,
 		nombre: req.body.nombre,
 		fecha: req.body.fecha,
 		horaPrimerPago: req.body.horaPrimerPago,
@@ -42,12 +45,15 @@ app.post('/automatize', (req, res) => {
 		cantidad: req.body.cantidad,
 		timesPaid: 0,
 	}
-	let automatizaciones = storage.get('automatizaciones')
-	if(!automatizaciones) automatizaciones = []
+	let automatizaciones = storage.get('automatizaciones') ? storage.get('automatizaciones') : []
 	automatizaciones.push(automatizacion)
 	storage.set('automatizaciones', automatizaciones)
+	storage.set('lastId', lastId)
 	automatize()
 	res.send(JSON.stringify({isOk: true}))
+})
+app.get('/automations', (req, res) => {
+	res.send(JSON.stringify(storage.get('automatizaciones')))
 })
 app.get('/stop-automatize', (req, res) => {
 	storage.set('interval', undefined)
@@ -107,15 +113,15 @@ function automatize(automatizaciones) {
 				// If the time has come, send the first payment
 				if(año >= añoObjetivo && mes >= mesObjetivo && dia >= diaObjetivo && hora >= horaObjetivo && minuto >= minutoObjetivo)
 					console.log('Sending first payment...')
-					transfer(auto.receiver, auto.cantidad)
 					automatizaciones[i].timesPaid++
+					transfer(auto.receiver, auto.cantidad, automatizaciones[i])
 					automationChanged = true
 				}
 			} else if(auto.timesPaid < auto.vecesRepetir) {
 				// Si hay otra repetición, enviar el pago
 				console.log('Sending repeated payment...')
-				transfer(auto.receiver, auto.cantidad)
 				automatizaciones[i].timesPaid++
+				transfer(auto.receiver, auto.cantidad, automatizaciones[i])
 				automationChanged = true
 			}
 		}
@@ -136,7 +142,7 @@ function checkActiveInterval() {
 }
 
 // To send a transaction to run the generateRandom function
-function transfer(receiver, cantidad) {
+function transfer(receiver, cantidad, automation) {
     const encodedTransfer = contractInstance.methods.transfer(receiver, cantidad * 1e6).encodeABI()
     const tx = {
         from: myAddress,
@@ -148,28 +154,22 @@ function transfer(receiver, cantidad) {
         chainId: 3, // Ropsten TODO uncomment this on production
     }
 	let pastResults = storage.get('history') ? storage.get('history') : []
-	let result = {
-		isOk: false,
-		sent: new Date(),
-		receiver: storage.get('receiver'),
-		tokens: storage.get('tokens'),
-		interval: storage.get('interval'),
-		error: '',
-	}
 
     web3.eth.accounts.signTransaction(tx, privateKey).then(signed => {
         console.log('Generating transaction...')
         web3.eth.sendSignedTransaction(signed.rawTransaction)
             .on('receipt', result => {
                 console.log('Transfer successful!')
-				result.isOk = true
-				pastResults.push(result)
+				automation.isOk = true
+				automation.error = false
+				pastResults.push(automation)
 				storage.set('history', pastResults)
             })
             .catch(error => {
 				console.log('Error', error)
-				result.error = error
-				pastResults.push(result)
+				automation.isOk = false
+				automation.error = error
+				pastResults.push(automation)
 				storage.set('history', pastResults)
 			})
     })
