@@ -12,7 +12,19 @@
       "intervalo": "2",
       "cantidad": "80",
       "timesPaid": 0
+    },
+    {
+      "id": 3,
+      "nombre": "Meru",
+      "fecha": "2019-04-25",
+      "horaPrimerPago": "17:45",
+      "email": "merunas@gmail.com",
+      "vecesRepetir": "5",
+      "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
+      "intervalo": "3",
+      "cantidad": "80",
+      "timesPaid": 0
     }
   ],
-  "lastId": 2
+  "lastId": 3
 }

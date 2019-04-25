@@ -28,7 +28,6 @@ class Home extends React.Component {
     async start() {
         let response = await fetch('/is-seed-setup')
         response = await response.json()
-        console.log('Respuesta', response)
         if(response.isOk) {
             this.setState({
                 seedSetupMessage: 'Ya hay una seed guardada en el programa, puedes cambiarla si quieres debajo',
@@ -37,12 +36,9 @@ class Home extends React.Component {
         } else {
             this.setState({seedSetupMessage: 'No hay ninguna seed guardada en el programa, añade una nueva'})
         }
-
         response = await fetch('/automations')
         response = await response.json()
         this.setState({automations: response})
-        console.log('Automations', response)
-
         // Quitado de momento por añadir bastante complejidad
         // response = await fetch('/get-accounts-seed')
         // response = await response.json()
@@ -202,9 +198,19 @@ class Dashboard extends React.Component {
     }
 
     render() {
-        let automationsHTML = this.props.automations
-
-        console.log('Automations html', automationsHTML)
+        let automationsHTML = this.props.automations.map(element => (
+            <div key={element.id}>
+                <div>Nombre {element.nombre}</div>
+                <div>Email {element.email}</div>
+                <div>Fecha {element.fecha}</div>
+                <div>Hora primer pago {element.horaPrimerPago}</div>
+                <div>Receptor {element.receiver}</div>
+                <div>Cantidad {element.cantidad}</div>
+                <div>Intervalo {element.intervalo}</div>
+                <div>Veces a pagar {element.vecesRepetir}</div>
+                <div>Veces pagado {element.timesPaid}</div>
+            </div>
+        ))
 
         return(
             <div className="dashboard">
