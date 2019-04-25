@@ -96,6 +96,7 @@ app.listen(port, '0.0.0.0', () => {
 function automatize(automatizaciones) {
 	console.log('Starting automatization...')
 	interval = setInterval(() => {
+		console.log('Running interval...')
 		let automationChanged = false
 		for(let i = 0; i < automatizaciones.length; i++) {
 			let auto = automatizaciones[i]
@@ -128,7 +129,10 @@ function automatize(automatizaciones) {
 			}
 		}
 		if(automationChanged) {
+			console.log('Automations sent...')
 			storage.set('automatizaciones', automatizaciones)
+		} else {
+			console.log('No automations sent...')
 		}
 	}, 60e3) // Every 60 seconds
 }

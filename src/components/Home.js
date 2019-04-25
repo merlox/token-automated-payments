@@ -199,7 +199,7 @@ class Dashboard extends React.Component {
 
     render() {
         let automationsHTML = this.props.automations.map(element => (
-            <div key={element.id}>
+            <div key={element.id} className="automation-container">
                 <div>Nombre {element.nombre}</div>
                 <div>Email {element.email}</div>
                 <div>Fecha {element.fecha}</div>
@@ -215,6 +215,7 @@ class Dashboard extends React.Component {
         return(
             <div className="dashboard">
                 <div>
+                    {automationsHTML}
                 </div>
                 <b>{this.props.automations.length <= 0 ? 'No hay ninguna automatización en progreso' : ''}</b>
                 <p><b>{this.state.mensajePagosDetenidos}</b></p>
