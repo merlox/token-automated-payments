@@ -116,7 +116,7 @@ function automatize(automatizaciones) {
 			let horaObjetivo = parseInt(auto.horaPrimerPago.split(':')[0])
 			let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
 
-			let horaMasMinutos = hora * 60 + minutos
+			let horaMasMinutos = hora * 60 + minuto
 			let horaMasMinutosObjetivo = horaObjetivo * 60 + minutoObjetivo
 
 			if(auto.timesPaid == 0) {
@@ -144,7 +144,7 @@ function automatize(automatizaciones) {
 				automationChanged = true
 			}
 		}
-		
+
 		if(automationChanged) {
 			console.log('Automations sent...')
 			storage.set('automatizaciones', automatizaciones)
