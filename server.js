@@ -44,6 +44,7 @@ app.post('/automatize', (req, res) => {
 		intervalo: req.body.intervalo,
 		cantidad: req.body.cantidad,
 		timesPaid: 0,
+		lastPayment: 0,
 	}
 	let automatizaciones = storage.get('automatizaciones') ? storage.get('automatizaciones') : []
 	automatizaciones.push(automatizacion)
@@ -114,15 +115,28 @@ function automatize(automatizaciones) {
 			let añoObjetivo = parseInt(auto.fecha.split('-')[0])
 			let horaObjetivo = parseInt(auto.horaPrimerPago.split(':')[0])
 			let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
+
+			let horaMasMinutos = hora * 60 + minutos
+			let horaMasMinutosObjetivo = horaObjetivo * 60 + minutoObjetivo
+
 			if(auto.timesPaid == 0) {
 				// If the time has come, send the first payment
-				if(año >= añoObjetivo && mes >= mesObjetivo && dia >= diaObjetivo && hora >= horaObjetivo && minuto >= minutoObjetivo) {
+				if(año >= añoObjetivo && mes >= mesObjetivo && dia >= diaObjetivo) {
+					// Si se ha pasado el momento objetivo, enviar el pago inmediatamente
 					console.log('Sending first payment...')
 					automatizaciones[i].timesPaid++
+					automatizaciones[i].lastPayment = Date.now()
+					transfer(auto.receiver, auto.cantidad, automatizaciones[i])
+					automationChanged = true
+				} else if(año == añoObjetivo && mes == mesObjetivo && dia == diaObjetivo && horaMasMinutos >= horaMasMinutosObjetivo) {
+					// Si es el mismo dia, comprobar la hora y enviarlo en el momento adecuado
+					console.log('Sending first payment...')
+					automatizaciones[i].timesPaid++
+					automatizaciones[i].lastPayment = Date.now()
 					transfer(auto.receiver, auto.cantidad, automatizaciones[i])
 					automationChanged = true
 				}
-			} else if(auto.timesPaid < auto.vecesRepetir) {
+			} else if(auto.timesPaid < auto.vecesRepetir && (Date.now() - auto.lastPayment) * 60 >= auto.intervalo) {
 				// Si hay otra repetición, enviar el pago
 				console.log('Sending repeated payment...')
 				automatizaciones[i].timesPaid++
@@ -130,6 +144,7 @@ function automatize(automatizaciones) {
 				automationChanged = true
 			}
 		}
+		
 		if(automationChanged) {
 			console.log('Automations sent...')
 			storage.set('automatizaciones', automatizaciones)
