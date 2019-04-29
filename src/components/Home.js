@@ -36,13 +36,20 @@ class Home extends React.Component {
         } else {
             this.setState({seedSetupMessage: 'No hay ninguna seed guardada en el programa, añade una nueva'})
         }
-        response = await fetch('/automations')
-        response = await response.json()
-        this.setState({automations: response})
+        await this.getAutomations()
+        setInterval(async () => {
+            await this.getAutomations()
+        }, 3e3)
         // Quitado de momento por añadir bastante complejidad
         // response = await fetch('/get-accounts-seed')
         // response = await response.json()
         // console.log('Accounts seed', response)
+    }
+
+    async getAutomations() {
+        let response = await fetch('/automations')
+        response = await response.json()
+        this.setState({automations: response})
     }
 
     async guardarSeed() {
@@ -175,7 +182,7 @@ class Home extends React.Component {
                         }}>Comenzar a realizar pagos</button>
                     </div>
                 </div>
-                <Dashboard automations={this.state.automations} />
+                <Dashboard automations={this.state.automations} getAutomations={() => this.getAutomations()} />
                 <div className="end-spacer"></div>
             </div>
         )
@@ -190,25 +197,31 @@ class Dashboard extends React.Component {
         }
     }
 
-    async detenerPagos() {
-        let result = await fetch('/stop-automatize')
-        result = await result.json()
-        if(result.isOk) this.setState({mensajePagosDetenidos: 'Se han detenido los pagos con éxito'})
+    async detenerPagos(id) {
+        let response = await fetch('/stop-automatize', {
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id }),
+        })
+        response = await response.json()
+        if(response.isOk) this.setState({mensajePagosDetenidos: 'Se han detenido los pagos con éxito'})
         else this.setState({mensajePagosDetenidos: 'No se ha podido detener los pagos debido a un error, inténtalo de nuevo'})
+        this.props.getAutomations()
     }
 
     render() {
         let automationsHTML = this.props.automations.map(element => (
             <div key={element.id} className="automation-container">
-                <div>Nombre {element.nombre}</div>
-                <div>Email {element.email}</div>
-                <div>Fecha {element.fecha}</div>
-                <div>Hora primer pago {element.horaPrimerPago}</div>
-                <div>Receptor {element.receiver}</div>
-                <div>Cantidad {element.cantidad}</div>
-                <div>Intervalo {element.intervalo}</div>
-                <div>Veces a pagar {element.vecesRepetir}</div>
-                <div>Veces pagado {element.timesPaid}</div>
+                <div className="columna-primera">Nombre</div> <div className="columna-segunda">{element.nombre}</div>
+                <div className="columna-primera">Email</div> <div className="columna-segunda">{element.email}</div>
+                <div className="columna-primera">Fecha</div> <div className="columna-segunda">{element.fecha}</div>
+                <div className="columna-primera">Hora primer pago</div> <div className="columna-segunda">{element.horaPrimerPago}</div>
+                <div className="columna-primera">Recipiente</div> <div className="columna-segunda">{element.receiver}</div>
+                <div className="columna-primera">Cantidad</div> <div className="columna-segunda">{element.cantidad} tokens</div>
+                <div className="columna-primera">Intervalo</div> <div className="columna-segunda">{element.intervalo} horas</div>
+                <div className="columna-primera">Veces a pagar</div> <div className="columna-segunda">{element.vecesRepetir}</div>
+                <div className="columna-primera">Veces pagado</div> <div className="columna-segunda">{element.timesPaid}</div>
+                <button className="detener-pagos" onClick={() => this.detenerPagos(element.id)}>Detener Pagos</button>
             </div>
         ))
 
@@ -219,7 +232,6 @@ class Dashboard extends React.Component {
                 </div>
                 <b>{this.props.automations.length <= 0 ? 'No hay ninguna automatización en progreso' : ''}</b>
                 <p><b>{this.state.mensajePagosDetenidos}</b></p>
-                <button onClick={() => this.detenerPagos()}>Detener pagos</button>
             </div>
         )
     }

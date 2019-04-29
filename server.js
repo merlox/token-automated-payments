@@ -57,12 +57,14 @@ app.get('/automations', (req, res) => {
 	const automations = storage.get('automatizaciones') ? JSON.stringify(storage.get('automatizaciones')) : []
 	res.send(automations)
 })
-app.get('/stop-automatize', (req, res) => {
-	storage.set('interval', undefined)
-	storage.set('receiver', undefined)
-	storage.set('tokens', undefined)
-	storage.set('isActive', undefined)
+app.post('/stop-automatize', (req, res) => {
+	let automatizaciones = storage.get('automatizaciones')
+	// Delete the automatizacion with that id while keeping the rest
+	let autoWithoutElement = automatizaciones.filter(element => element.id !== req.body.id)
+
+	storage.set('automatizaciones', autoWithoutElement)
 	clearInterval(interval)
+	automatize(autoWithoutElement)
 	res.send(JSON.stringify({isOk: true}))
 })
 app.get('/is-seed-setup', (req, res) => {
