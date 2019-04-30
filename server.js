@@ -103,40 +103,23 @@ function automatize(automatizaciones) {
 		let automationChanged = false
 		for(let i = 0; i < automatizaciones.length; i++) {
 			let auto = automatizaciones[i]
-			let fecha = new Date().toLocaleString('es-ES', {hour12: false, day: '2-digit', month: '2-digit', year: '2-digit'}).split('/')
-			let tiempo = new Date().toLocaleString('es-ES', {hour12: false, hour: '2-digit', minute: '2-digit'}).split(':')
-			let dia = parseInt(fecha[0])
-			let mes = parseInt(fecha[1])
-			let año = parseInt(fecha[2])
-			let hora = parseInt(tiempo[0])
-			let minuto = parseInt(tiempo[1])
 			let diaObjetivo = parseInt(auto.fecha.split('-')[2])
 			let mesObjetivo = parseInt(auto.fecha.split('-')[1])
 			let añoObjetivo = parseInt(auto.fecha.split('-')[0])
 			let horaObjetivo = parseInt(auto.horaPrimerPago.split(':')[0])
 			let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
 
-			let horaMasMinutos = hora * 60 + minuto
-			let horaMasMinutosObjetivo = horaObjetivo * 60 + minutoObjetivo
+			let dateAhora = Date.now()
+			let dateObjetivo = new Date(añoObjetivo, mesObjetivo - 1, diaObjetivo, horaObjetivo, minutoObjetivo).getTime()
 
-			if(auto.timesPaid == 0) {
+			if(auto.timesPaid == 0 && dateAhora >= dateObjetivo) {
 				// If the time has come, send the first payment
-				if(año >= añoObjetivo && mes >= mesObjetivo && dia >= diaObjetivo) {
-					// Si se ha pasado el momento objetivo, enviar el pago inmediatamente
-					console.log('Sending first payment...')
-					automatizaciones[i].timesPaid++
-					automatizaciones[i].lastPayment = Date.now()
-					transfer(auto.receiver, auto.cantidad, automatizaciones[i])
-					automationChanged = true
-				} else if(año == añoObjetivo && mes == mesObjetivo && dia == diaObjetivo && horaMasMinutos >= horaMasMinutosObjetivo) {
-					// Si es el mismo dia, comprobar la hora y enviarlo en el momento adecuado
-					console.log('Sending first payment...')
-					automatizaciones[i].timesPaid++
-					automatizaciones[i].lastPayment = Date.now()
-					transfer(auto.receiver, auto.cantidad, automatizaciones[i])
-					automationChanged = true
-				}
-			} else if(auto.timesPaid < auto.vecesRepetir && (Date.now() - auto.lastPayment) * 60 >= auto.intervalo) {
+				console.log('Sending first payment...')
+				automatizaciones[i].timesPaid++
+				automatizaciones[i].lastPayment = Date.now()
+				transfer(auto.receiver, auto.cantidad, automatizaciones[i])
+				automationChanged = true
+			} else if(auto.timesPaid < auto.vecesRepetir && (dateAhora - auto.lastPayment) * 60 >= auto.intervalo) {
 				// Si hay otra repetición, enviar el pago
 				console.log('Sending repeated payment...')
 				automatizaciones[i].timesPaid++
