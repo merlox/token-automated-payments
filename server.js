@@ -8,11 +8,11 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const Store = require('data-store')
 const port = 8000
-// const infura = 'wss://mainnet.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
-const infura = 'wss://ropsten.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
+const infura = 'wss://mainnet.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
+// const infura = 'wss://ropsten.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
 const storage = new Store({path: 'config.json'})
-// let contractAddress = '0x82e5497347eC3d9a98632b7d5A844b645F0bA8c6' // Mainnet
-let contractAddress = '0x3ab136900ce4d05282782c58ebaf7fc811adda40' // Ropsten
+let contractAddress = '0x82e5497347eC3d9a98632b7d5A844b645F0bA8c6' // Mainnet
+// let contractAddress = '0x3ab136900ce4d05282782c58ebaf7fc811adda40' // Ropsten
 let contractInstance
 let web3
 let privateKey
