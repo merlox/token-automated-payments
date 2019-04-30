@@ -11,7 +11,7 @@
       "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
       "intervalo": 0,
       "cantidad": "10",
-      "timesPaid": 19,
+      "timesPaid": 20,
       "lastPayment": 1556617770031,
       "isOk": true,
       "error": false
@@ -74,7 +74,7 @@
       "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
       "intervalo": 0,
       "cantidad": "10",
-      "timesPaid": 19,
+      "timesPaid": 20,
       "lastPayment": 1556617770031,
       "isOk": true,
       "error": false
@@ -89,7 +89,7 @@
       "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
       "intervalo": 0,
       "cantidad": "10",
-      "timesPaid": 19,
+      "timesPaid": 20,
       "lastPayment": 1556617770031,
       "isOk": true,
       "error": false
@@ -104,7 +104,7 @@
       "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
       "intervalo": 0,
       "cantidad": "10",
-      "timesPaid": 19,
+      "timesPaid": 20,
       "lastPayment": 1556617770031,
       "isOk": true,
       "error": false
@@ -119,7 +119,7 @@
       "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
       "intervalo": 0,
       "cantidad": "10",
-      "timesPaid": 19,
+      "timesPaid": 20,
       "lastPayment": 1556617770031,
       "isOk": true,
       "error": false
@@ -134,7 +134,22 @@
       "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
       "intervalo": 0,
       "cantidad": "10",
-      "timesPaid": 19,
+      "timesPaid": 20,
+      "lastPayment": 1556617770031,
+      "isOk": true,
+      "error": false
+    },
+    {
+      "id": 6,
+      "nombre": "Merunas",
+      "fecha": "2019-01-01",
+      "horaPrimerPago": "22:11",
+      "email": "",
+      "vecesRepetir": "20",
+      "receiver": "0x8c5a579A06FaC3b723d97061E295582dE2825035",
+      "intervalo": 0,
+      "cantidad": "10",
+      "timesPaid": 20,
       "lastPayment": 1556617770031,
       "isOk": true,
       "error": false

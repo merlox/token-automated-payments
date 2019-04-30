@@ -116,9 +116,6 @@ function payment(automatizaciones) {
 		let dateAhora = Date.now()
 		let dateObjetivo = new Date(añoObjetivo, mesObjetivo - 1, diaObjetivo, horaObjetivo, minutoObjetivo).getTime()
 
-		console.log('Date ahora', dateAhora)
-		console.log('Date objetivo', dateObjetivo)
-
 		if(auto.timesPaid == 0 && dateAhora >= dateObjetivo) {
 			// If the time has come, send the first payment
 			console.log('Sending first payment...')
