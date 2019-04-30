@@ -98,43 +98,49 @@ app.listen(port, '0.0.0.0', () => {
 
 function automatize(automatizaciones) {
 	console.log('Starting automatization...')
-	interval = setInterval(() => {
-		console.log('Running interval...')
-		let automationChanged = false
-		for(let i = 0; i < automatizaciones.length; i++) {
-			let auto = automatizaciones[i]
-			let diaObjetivo = parseInt(auto.fecha.split('-')[2])
-			let mesObjetivo = parseInt(auto.fecha.split('-')[1])
-			let añoObjetivo = parseInt(auto.fecha.split('-')[0])
-			let horaObjetivo = parseInt(auto.horaPrimerPago.split(':')[0])
-			let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
+	payment(automatizaciones)
+	interval = setInterval(() => payment(automatizaciones), 60e3) // Every 60 seconds
+}
 
-			let dateAhora = Date.now()
-			let dateObjetivo = new Date(añoObjetivo, mesObjetivo - 1, diaObjetivo, horaObjetivo, minutoObjetivo).getTime()
+function payment(automatizaciones) {
+	console.log('Running interval...')
+	let automationChanged = false
+	for(let i = 0; i < automatizaciones.length; i++) {
+		let auto = automatizaciones[i]
+		let diaObjetivo = parseInt(auto.fecha.split('-')[2])
+		let mesObjetivo = parseInt(auto.fecha.split('-')[1])
+		let añoObjetivo = parseInt(auto.fecha.split('-')[0])
+		let horaObjetivo = parseInt(auto.horaPrimerPago.split(':')[0])
+		let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
 
-			if(auto.timesPaid == 0 && dateAhora >= dateObjetivo) {
-				// If the time has come, send the first payment
-				console.log('Sending first payment...')
-				automatizaciones[i].timesPaid++
-				automatizaciones[i].lastPayment = Date.now()
-				transfer(auto.receiver, auto.cantidad, automatizaciones[i])
-				automationChanged = true
-			} else if(auto.timesPaid < auto.vecesRepetir && (dateAhora - auto.lastPayment) * 60 >= auto.intervalo) {
-				// Si hay otra repetición, enviar el pago
-				console.log('Sending repeated payment...')
-				automatizaciones[i].timesPaid++
-				transfer(auto.receiver, auto.cantidad, automatizaciones[i])
-				automationChanged = true
-			}
+		let dateAhora = Date.now()
+		let dateObjetivo = new Date(añoObjetivo, mesObjetivo - 1, diaObjetivo, horaObjetivo, minutoObjetivo).getTime()
+
+		console.log('Date ahora', dateAhora)
+		console.log('Date objetivo', dateObjetivo)
+
+		if(auto.timesPaid == 0 && dateAhora >= dateObjetivo) {
+			// If the time has come, send the first payment
+			console.log('Sending first payment...')
+			automatizaciones[i].timesPaid++
+			automatizaciones[i].lastPayment = Date.now()
+			transfer(auto.receiver, auto.cantidad, automatizaciones[i])
+			automationChanged = true
+		} else if(auto.timesPaid < auto.vecesRepetir && (dateAhora - auto.lastPayment) * 60 >= auto.intervalo) {
+			// Si hay otra repetición, enviar el pago
+			console.log('Sending repeated payment...')
+			automatizaciones[i].timesPaid++
+			transfer(auto.receiver, auto.cantidad, automatizaciones[i])
+			automationChanged = true
 		}
+	}
 
-		if(automationChanged) {
-			console.log('Automations sent...')
-			storage.set('automatizaciones', automatizaciones)
-		} else {
-			console.log('No automations sent...')
-		}
-	}, 60e3) // Every 60 seconds
+	if(automationChanged) {
+		console.log('Automations sent...')
+		storage.set('automatizaciones', automatizaciones)
+	} else {
+		console.log('No automations sent...')
+	}
 }
 
 function checkActiveInterval() {
@@ -153,7 +159,7 @@ function transfer(receiver, cantidad, automation) {
     const tx = {
         from: myAddress,
         gas: 6e6,
-        gasPrice: 5e9, // 5 GWEI not wei
+        gasPrice: 10e9, // 5 GWEI not wei
         to: contractAddress,
         data: encodedTransfer,
 		chainId: 1,
@@ -164,7 +170,7 @@ function transfer(receiver, cantidad, automation) {
         console.log('Generating transaction...')
         web3.eth.sendSignedTransaction(signed.rawTransaction)
             .on('receipt', result => {
-                console.log('Transfer successful!')
+                console.log('Transfer successful!', result.transactionHash)
 				automation.isOk = true
 				automation.error = false
 				history.push(automation)
