@@ -1,3 +1,5 @@
+'use strict'
+
 const Web3 = require('web3')
 const bip39 = require("bip39");
 const hdkey = require('ethereumjs-wallet/hdkey');
