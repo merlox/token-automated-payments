@@ -9,7 +9,7 @@ const fs = require('fs')
 const bodyParser = require('body-parser')
 const path = require('path')
 const Store = require('data-store')
-const port = 8000
+const port = 80
 const infura = 'wss://mainnet.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
 // const infura = 'wss://ropsten.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
 const storage = new Store({path: 'config.json'})
@@ -162,7 +162,7 @@ function transfer(receiver, cantidad, automation) {
         to: contractAddress,
         data: encodedTransfer,
 		chainId: 1,
-        chainId: 3, // Ropsten TODO uncomment this on production
+        //chainId: 3, // Ropsten TODO uncomment this on production
     }
 	let history = storage.get('history') ? storage.get('history') : []
     web3.eth.accounts.signTransaction(tx, privateKey).then(signed => {
