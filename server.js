@@ -125,7 +125,7 @@ function payment(automatizaciones) {
 			automatizaciones[i].lastPayment = Date.now()
 			transfer(auto.receiver, auto.cantidad, automatizaciones[i])
 			automationChanged = true
-		} else if(auto.timesPaid < auto.vecesRepetir && (new Date(dateAhora).getHours() - new Date(auto.lastPayment).getHours()) >= auto.intervalo) {
+		} else if((auto.vecesRepetir == 0 || auto.timesPaid < auto.vecesRepetir) && (new Date(dateAhora).getHours() - new Date(auto.lastPayment).getHours()) >= auto.intervalo) {
 			// Si hay otra repetición, enviar el pago
 			console.log('Sending repeated payment...')
 			automatizaciones[i].timesPaid++
