@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 app.post('/seed-phrase', (req, res) => {
     storage.set('seedPhrase', req.body.seedPhrase.trim())
     console.log('Saved seed phrase')
+	generateAddressesFromSeed(mnemonic)
     res.send(JSON.stringify({isOk: true}))
 })
 app.post('/automatize', (req, res) => {
@@ -125,10 +126,11 @@ function payment(automatizaciones) {
 			automatizaciones[i].lastPayment = Date.now()
 			transfer(auto.receiver, auto.cantidad, automatizaciones[i])
 			automationChanged = true
-		} else if((auto.vecesRepetir == 0 || auto.timesPaid < auto.vecesRepetir) && (new Date(dateAhora).getHours() - new Date(auto.lastPayment).getHours()) >= auto.intervalo) {
+		} else if((auto.vecesRepetir == 0 || auto.timesPaid < auto.vecesRepetir) && (new Date(dateAhora).getTime() - new Date(auto.lastPayment).getTime()) >= auto.intervalo * 1e3 * 60 * 60) {
 			// Si hay otra repetición, enviar el pago
 			console.log('Sending repeated payment...')
 			automatizaciones[i].timesPaid++
+			automatizaciones[i].lastPayment = Date.now()
 			transfer(auto.receiver, auto.cantidad, automatizaciones[i])
 			automationChanged = true
 		}
