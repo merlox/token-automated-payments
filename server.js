@@ -10,16 +10,24 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const Store = require('data-store')
 const port = 80
-const infura = 'wss://mainnet.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
-// const infura = 'wss://ropsten.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
 const storage = new Store({path: 'config.json'})
-let contractAddress = '0x82e5497347eC3d9a98632b7d5A844b645F0bA8c6' // Mainnet
-// let contractAddress = '0x3ab136900ce4d05282782c58ebaf7fc811adda40' // Ropsten
+let infura
+let contractAddress
 let contractInstance
 let web3
 let privateKey
 let myAddress
 let interval
+
+if(process.env.NODE_ENV == 'development') {
+	infura = 'wss://ropsten.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d' // Ropsten
+	contractAddress = '0x3ab136900ce4d05282782c58ebaf7fc811adda40' // Ropsten
+	console.log('Environment development')
+} else {
+	infura = 'wss://mainnet.infura.io/ws/v3/f7b2c280f3f440728c2b5458b41c663d'
+	contractAddress = '0x82e5497347eC3d9a98632b7d5A844b645F0bA8c6'
+	console.log('Environment production')
+}
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}))
@@ -157,14 +165,14 @@ function checkActiveInterval() {
 // To send a transaction to run the generateRandom function
 function transfer(receiver, cantidad, automation) {
     const encodedTransfer = contractInstance.methods.transfer(receiver, cantidad * 1e6).encodeABI()
+	let chainId = process.env.NODE_ENV == 'development' ? 3 : 1
     const tx = {
         from: myAddress,
         gas: 6e6,
         gasPrice: 10e9, // 5 GWEI not wei
         to: contractAddress,
         data: encodedTransfer,
-		chainId: 1,
-        //chainId: 3, // Ropsten TODO uncomment this on production
+		chainId
     }
 	let history = storage.get('history') ? storage.get('history') : []
     web3.eth.accounts.signTransaction(tx, privateKey).then(signed => {
