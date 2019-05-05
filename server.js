@@ -36,7 +36,8 @@ app.use((req, res, next) => {
     next()
 })
 app.post('/seed-phrase', (req, res) => {
-    storage.set('seedPhrase', req.body.seedPhrase.trim())
+	let mnemonic = req.body.seedPhrase.trim()
+    storage.set('seedPhrase', mnemonic)
     console.log('Saved seed phrase')
 	generateAddressesFromSeed(mnemonic)
     res.send(JSON.stringify({isOk: true}))

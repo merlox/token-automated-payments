@@ -1,7 +1,36 @@
 {
-  "seedPhrase": "decline donor grit stay warfare wood action rival science discover detect bundle",
-  "automatizaciones": [],
-  "lastId": 12,
+  "seedPhrase": "earn road aerobic mushroom merry exclude orchard extra absent figure wool direct",
+  "automatizaciones": [
+    {
+      "id": 13,
+      "nombre": "Merunas",
+      "fecha": "2019-05-05",
+      "horaPrimerPago": "05:05",
+      "email": "example@gmail.com",
+      "vecesRepetir": "0",
+      "receiver": "0x2f9Ca2457E74Fc3f359F82B1C34d3118e596ba42",
+      "intervalo": "4",
+      "cantidad": "10",
+      "timesPaid": 1,
+      "lastPayment": 1557061503598
+    },
+    {
+      "id": 14,
+      "nombre": "Merunas",
+      "fecha": "2019-05-05",
+      "horaPrimerPago": "05:05",
+      "email": "example@gmail.com",
+      "vecesRepetir": "0",
+      "receiver": "0x2f9Ca2457E74Fc3f359F82B1C34d3118e596ba42",
+      "intervalo": "4",
+      "cantidad": "10",
+      "timesPaid": 1,
+      "lastPayment": 1557061763046,
+      "isOk": false,
+      "error": {}
+    }
+  ],
+  "lastId": 14,
   "history": [
     {
       "id": 7,
@@ -932,6 +961,21 @@
       "lastPayment": 0,
       "isOk": true,
       "error": false
+    },
+    {
+      "id": 14,
+      "nombre": "Merunas",
+      "fecha": "2019-05-05",
+      "horaPrimerPago": "05:05",
+      "email": "example@gmail.com",
+      "vecesRepetir": "0",
+      "receiver": "0x2f9Ca2457E74Fc3f359F82B1C34d3118e596ba42",
+      "intervalo": "4",
+      "cantidad": "10",
+      "timesPaid": 1,
+      "lastPayment": 1557061763046,
+      "isOk": false,
+      "error": {}
     }
   ]
 }
