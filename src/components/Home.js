@@ -17,7 +17,7 @@ class Home extends React.Component {
             fecha: '',
             horaPrimerPago: '',
             email: '',
-            vecesRepetir: 0,
+            vecesRepetir: undefined,
             receiver: '',
             intervalo: 0,
             cantidad: 0,
@@ -72,7 +72,7 @@ class Home extends React.Component {
         if(this.state.fecha.length == 0) return alert('Tienes que poner la fecha del primer pago')
         if(this.state.horaPrimerPago == 0) return alert('Tienes que poner la hora del primer pago')
         if(this.state.receiver.length == 0) return alert('Tienes que poner el recipient del pago')
-        if(this.state.vecesRepetir == 0) return alert('Tienes que poner las veces a repetir el pago (0 es infinitas veces)')
+        if(this.state.vecesRepetir == undefined) return alert('Tienes que poner las veces a repetir el pago (0 es infinitas veces)')
         if(this.state.cantidad == 0) return alert('Tienes que poner la cantidad de tokens a enviar')
         let response = await fetch('/automatize', {
             method: 'post',
@@ -122,18 +122,16 @@ class Home extends React.Component {
                             }} type="text" placeholder="Nombre del recipiente..."/>
                         </div>
                         <div className="two-block">
-                            <p>*Fecha:</p>
-                            <input onChange={e => {
-                                this.setState({fecha: e.target.value})
-                            }} onBlur={e => {
-                                this.setState({fecha: e.target.value})
-                            }} type="date" placeholder="Fecha..."/>
+                            <p>*Fecha (mes/dia/año):</p>
+                            <input ref="fecha" type="date" placeholder="Fecha..."/>
                         </div>
                         <div className="two-block">
                             <p>*Hora del primer pago:</p>
                             <input onChange={e => {
                                 this.setState({horaPrimerPago: e.target.value})
                             }} onBlur={e => {
+                                this.setState({horaPrimerPago: e.target.value})
+                            }} onMouseDown={e => {
                                 this.setState({horaPrimerPago: e.target.value})
                             }} type="time" placeholder="Hora de pago..." />
                         </div>
@@ -177,8 +175,13 @@ class Home extends React.Component {
                             }} type="number" placeholder={`Tokens a enviar cada ${this.state.intervalo == 1 ? '1 hora' : this.state.intervalo + ' horas'}...`} />
                         </div>
                         <button disabled={!this.state.guardarClicked} title="Tienes que guardar tu seed phrase antes de activar la automatización" className="payment-button" onClick={() => {
-                            this.automatize()
-                            window.scrollTo(0, 0)
+                            // Set the date first and do the rest because of the browser bug that doesn't update the date with the onChange event
+                            this.setState({fecha: this.refs.fecha.value}, () => {
+                                this.automatize()
+                                window.scrollTo(0, 0)
+                                this.setState({guardarClicked: false})
+                                setTimeout(() => this.setState({guardarClicked: true}), 3e3)
+                            })
                         }}>Comenzar a realizar pagos</button>
                     </div>
                 </div>

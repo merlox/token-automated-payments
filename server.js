@@ -42,7 +42,7 @@ app.post('/seed-phrase', (req, res) => {
 	generateAddressesFromSeed(mnemonic)
     res.send(JSON.stringify({isOk: true}))
 })
-app.post('/automatize', (req, res) => {
+app.post('/automatize', async (req, res) => {
 	let lastId = storage.get('lastId') ? storage.get('lastId') : 1
 	lastId++
 	const automatizacion = {
@@ -63,6 +63,7 @@ app.post('/automatize', (req, res) => {
 	storage.set('automatizaciones', automatizaciones)
 	storage.set('lastId', lastId)
 	clearInterval(interval)
+	await asyncTimeout(3e3)
 	automatize(automatizaciones)
 	res.send(JSON.stringify({isOk: true}))
 })
@@ -70,7 +71,7 @@ app.get('/automations', (req, res) => {
 	const automations = storage.get('automatizaciones') ? JSON.stringify(storage.get('automatizaciones')) : []
 	res.send(automations)
 })
-app.post('/stop-automatize', (req, res) => {
+app.post('/stop-automatize', async (req, res) => {
 	let automatizaciones = storage.get('automatizaciones')
 	// Delete the automatizacion with that id while keeping the rest
 	let autoWithoutElement = automatizaciones.filter(element => element.id !== req.body.id)
@@ -105,52 +106,59 @@ app.get('/', (req, res) => {
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server listening on localhost:${port}`)
 	setup()
-	checkActiveInterval()
 })
 
-function automatize(automatizaciones) {
+async function automatize(automatizaciones) {
 	console.log('Starting automatization...')
-	payment(automatizaciones)
-	interval = setInterval(() => payment(automatizaciones), 60e3) // Every 60 seconds
+	await payment(automatizaciones)
+	interval = setInterval(async () => {
+		console.log('----- Running new repeated automation -----')
+		await payment(automatizaciones)
+	}, 60e3) // Every 60 seconds
 }
 
 function payment(automatizaciones) {
 	console.log('Running interval...')
-	let automationChanged = false
-	for(let i = 0; i < automatizaciones.length; i++) {
-		let auto = automatizaciones[i]
-		let diaObjetivo = parseInt(auto.fecha.split('-')[2])
-		let mesObjetivo = parseInt(auto.fecha.split('-')[1])
-		let añoObjetivo = parseInt(auto.fecha.split('-')[0])
-		let horaObjetivo = parseInt(auto.horaPrimerPago.split(':')[0])
-		let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
+	return new Promise(async resolve => {
+		let automationChanged = false
+		for(let i = 0; i < automatizaciones.length; i++) {
+			let auto = automatizaciones[i]
+			let diaObjetivo = parseInt(auto.fecha.split('-')[2])
+			let mesObjetivo = parseInt(auto.fecha.split('-')[1])
+			let añoObjetivo = parseInt(auto.fecha.split('-')[0])
+			let horaObjetivo = parseInt(auto.horaPrimerPago.split(':')[0])
+			let minutoObjetivo = parseInt(auto.horaPrimerPago.split(':')[1])
 
-		let dateAhora = Date.now()
-		let dateObjetivo = new Date(añoObjetivo, mesObjetivo - 1, diaObjetivo, horaObjetivo, minutoObjetivo).getTime()
+			let dateAhora = Date.now()
+			let dateObjetivo = new Date(añoObjetivo, mesObjetivo - 1, diaObjetivo, horaObjetivo, minutoObjetivo).getTime()
 
-		if(auto.timesPaid == 0 && dateAhora >= dateObjetivo) {
-			// If the time has come, send the first payment
-			console.log('Sending first payment...')
-			automatizaciones[i].timesPaid++
-			automatizaciones[i].lastPayment = Date.now()
-			transfer(auto.receiver, auto.cantidad, automatizaciones[i])
-			automationChanged = true
-		} else if((auto.vecesRepetir == 0 || auto.timesPaid < auto.vecesRepetir) && (new Date(dateAhora).getTime() - new Date(auto.lastPayment).getTime()) >= auto.intervalo * 1e3 * 60 * 60) {
-			// Si hay otra repetición, enviar el pago
-			console.log('Sending repeated payment...')
-			automatizaciones[i].timesPaid++
-			automatizaciones[i].lastPayment = Date.now()
-			transfer(auto.receiver, auto.cantidad, automatizaciones[i])
-			automationChanged = true
+			if(auto.timesPaid == 0 && dateAhora >= dateObjetivo) {
+				// If the time has come, send the first payment
+				console.log('Sending first payment...')
+				automatizaciones[i].timesPaid++
+				automatizaciones[i].lastPayment = Date.now()
+				await asyncTimeout(1e3)
+				await transfer(auto.receiver, auto.cantidad, automatizaciones[i])
+				automationChanged = true
+			} else if((auto.vecesRepetir == 0 || auto.timesPaid < auto.vecesRepetir) && (new Date(dateAhora).getTime() - new Date(auto.lastPayment).getTime()) >= auto.intervalo * 1e3 * 60 * 60) {
+				// Si hay otra repetición, enviar el pago
+				console.log('Sending repeated payment...')
+				automatizaciones[i].timesPaid++
+				automatizaciones[i].lastPayment = Date.now()
+				await asyncTimeout(1e3)
+				await transfer(auto.receiver, auto.cantidad, automatizaciones[i])
+				automationChanged = true
+			}
 		}
-	}
 
-	if(automationChanged) {
-		console.log('Automations sent...')
-		storage.set('automatizaciones', automatizaciones)
-	} else {
-		console.log('No automations sent...')
-	}
+		if(automationChanged) {
+			console.log('Automations sent...')
+			storage.set('automatizaciones', automatizaciones)
+		} else {
+			console.log('No automations sent...')
+		}
+		resolve()
+	})
 }
 
 function checkActiveInterval() {
@@ -165,58 +173,74 @@ function checkActiveInterval() {
 
 // To send a transaction to run the generateRandom function
 function transfer(receiver, cantidad, automation) {
-    const encodedTransfer = contractInstance.methods.transfer(receiver, cantidad * 1e6).encodeABI()
-	let chainId = process.env.NODE_ENV == 'development' ? 3 : 1
-    const tx = {
-        from: myAddress,
-        gas: 6e6,
-        gasPrice: 10e9, // 5 GWEI not wei
-        to: contractAddress,
-        data: encodedTransfer,
-		chainId
-    }
-	let history = storage.get('history') ? storage.get('history') : []
-    web3.eth.accounts.signTransaction(tx, privateKey).then(signed => {
-        console.log('Generating transaction...')
-        web3.eth.sendSignedTransaction(signed.rawTransaction)
-            .on('receipt', result => {
-                console.log('Transfer successful!', result.transactionHash)
-				automation.isOk = true
-				automation.error = false
-				history.push(automation)
-				storage.set('history', history)
-            })
-            .catch(error => {
-				console.log('Error', error)
-				automation.isOk = false
-				automation.error = error
-				history.push(automation)
-				storage.set('history', history)
-			})
-    })
+	return new Promise(async resolve => {
+	    const encodedTransfer = contractInstance.methods.transfer(receiver, cantidad * 1e6).encodeABI()
+		let chainId = process.env.NODE_ENV == 'development' ? 3 : 1
+		let nonce = await web3.eth.getTransactionCount(myAddress, 'pending')
+		console.log('Sending nonce', nonce)
+	    const tx = {
+			nonce,
+	        from: myAddress,
+	        gas: 6e6,
+	        gasPrice: 10e9, // 5 GWEI not wei
+	        to: contractAddress,
+	        data: encodedTransfer,
+			chainId
+	    }
+		let history = storage.get('history') ? storage.get('history') : []
+	    web3.eth.accounts.signTransaction(tx, privateKey).then(signed => {
+			resolve()
+	        console.log('Generating transaction...')
+	        web3.eth.sendSignedTransaction(signed.rawTransaction)
+	            .on('receipt', result => {
+	                console.log('Transfer successful!', result.transactionHash)
+					automation.isOk = true
+					automation.error = false
+					history.push(automation)
+					storage.set('history', history)
+	            })
+	            .catch(error => {
+					console.log('Error', error)
+					automation.isOk = false
+					automation.error = error
+					history.push(automation)
+					storage.set('history', history)
+				})
+	    })
+	})
 }
 
 // Setup web3 and start listening to events
-function setup() {
+async function setup() {
 	if(storage.get('seedPhrase')) {
 	    const mnemonic = storage.get('seedPhrase')
-	    generateAddressesFromSeed(mnemonic)
+	    await generateAddressesFromSeed(mnemonic)
 	    web3 = new Web3(new Web3.providers.WebsocketProvider(infura))
 	    const ABI = JSON.parse(fs.readFileSync(path.join(__dirname, 'build', 'contracts', 'Token.json')))
 	    contractInstance = new web3.eth.Contract(ABI.abi, contractAddress)
 		console.log('Contract instance setup')
+		checkActiveInterval()
 	} else {
 		console.log('No seed phrase found')
 	}
 }
 
 // To generate the private key and address needed to sign transactions
-async function generateAddressesFromSeed(seed) {
-    let hdwallet = hdkey.fromMasterSeed(await bip39.mnemonicToSeed(seed));
-    let wallet_hdpath = "m/44'/60'/0'/0/0";
-    let wallet = hdwallet.derivePath(wallet_hdpath).getWallet();
-    let address = '0x' + wallet.getAddress().toString("hex");
-    let myPrivateKey = wallet.getPrivateKey().toString("hex");
-    myAddress = address
-    privateKey = '0x' + myPrivateKey
+function generateAddressesFromSeed(seed) {
+	return new Promise(async resolve => {
+	    let hdwallet = hdkey.fromMasterSeed(await bip39.mnemonicToSeed(seed));
+	    let wallet_hdpath = "m/44'/60'/0'/0/0";
+	    let wallet = hdwallet.derivePath(wallet_hdpath).getWallet();
+	    let address = '0x' + wallet.getAddress().toString("hex");
+	    let myPrivateKey = wallet.getPrivateKey().toString("hex");
+	    myAddress = address
+	    privateKey = '0x' + myPrivateKey
+		resolve()
+	})
+}
+
+function asyncTimeout(time) {
+	return new Promise(resolve => {
+		setTimeout(() => {resolve()}, time)
+	})
 }
