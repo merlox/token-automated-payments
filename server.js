@@ -48,6 +48,19 @@ app.use('*', (req, res, next) => {
 	console.log(`${req.method} to ${req.originalUrl} at ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`)
 	next()
 })
+// Compression request to send the valid build files
+app.get('build.js', (req, res) => {
+	if (req.header('Accept-Encoding').includes('br')) {
+		res.set('Content-Encoding', 'br')
+		res.set('Content-Type', 'application/javascript; charset=UTF-8')
+		res.sendFile(path.join(__dirname, 'dist', 'build.js.br'))
+	} else if(req.header('Accept-Encoding').includes('gz')) {
+		res.set('Content-Encoding', '.gz')
+		res.set('Content-Type', 'application/javascript; charset=UTF-8')
+		res.sendFile(path.join(__dirname, 'dist', 'build.js.gz'))
+	}
+})
+app.use(express.static('dist'))
 app.post('/seed-phrase', (req, res) => {
 	let mnemonic = req.body.seedPhrase.trim()
     storage.set('seedPhrase', mnemonic)
@@ -108,12 +121,6 @@ app.get('/current-state', (req, res) => {
 		ultimoPago: storage.get('ultimoPago') ? storage.get('ultimoPago') : false
 	}
 	res.send(JSON.stringify(state))
-})
-app.get('/bundle.js', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'bundle.js'))
-})
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 
 app.listen(port, '0.0.0.0', () => {
